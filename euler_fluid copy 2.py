@@ -12,28 +12,6 @@ def main():
         else: 
             return 0
         
-    def samplefield(x, y, array, dx, dy):
-        n = 302
-        h1 = 1
-        h2 = 0.5
-        
-        x0 = min(math.floor(x-dx), 300)
-        tx = ((x-dx) - x0)
-        x1 = min(x0 + 1, 300)
-        y0 = min(math.floor(y-dy), 301)
-        ty = (y-dy) - y0 
-        y1 = min(y0 + 1, 101)
-        
-        sx = 1.0 - tx
-        sy = 1.0 - ty
-        
-        val = sx*sy * array[x0][y0] + tx*sy * array[x1][y0] + tx*ty * array[x1][y1] + sx*ty * array[x0][y1]
-        
-        return val
-        
-        
-        
-        
     #graph creation -----------------
     
     nx, ny = 300, 100
@@ -50,9 +28,6 @@ def main():
     
     vxarray = [[0.0 for _ in range(102)] for _ in range(302)]
     vyarray = [[0.0 for _ in range(102)] for _ in range(302)]
-    
-    marray = [[0.0 for _ in range(102)] for _ in range(302)]
-    new_m = [[0.0 for _ in range(102)] for _ in range(302)]
     
     #divergence(d)
     darray = [[0.0 for _ in range(101)] for _ in range(301)]
@@ -77,85 +52,85 @@ def main():
     vvectors = [[(0.0, 0.0) for _ in range(101)] for _ in range(301)]
     prelocations = [[(0.0, 0.0) for _ in range(101)] for _ in range(301)]
     
-    g = 0 #flow velocity
+    g = -9.8 #flow velocity
         
     while True:
 
-        vxarray[200][21] = -300
-        vxarray[200][22] = -300
-        vxarray[200][23] = -300
-        vxarray[200][24] = -300
-        vxarray[200][25] = -300
-        vxarray[200][26] = -300
-        vxarray[200][27] = -300
-        vxarray[200][28] = -300       
+        vxarray[80][20] = 200
         
-
         for i in range(1, 301):
             for j in range(1, 101):
-               vyarray[i][j] += changet * g
-                   
+                vyarray[i][j] += changet * g
+                    
         #divergence = d = vx(i+1,j)-vx(i,j)+vy(i,j+1)-vy(i,j)
         #ajust velocities for incompressablity
-        
-        
         for i in range(1, 301):
             for j in range(1, 101):
                 
-                d = 1.8*(vxarray[i+1][j] - vxarray[i][j] + vyarray[i][j+1] - vyarray[i][j])
-                
-                s = sarray[i+1][j] + sarray[i-1][j] + sarray[i][j+1] + sarray[i][j-1]
+                s_totalarray[i][j] = sarray[i+1][j] + sarray[i-1][j] + sarray[i][j+1] + sarray[i][j-1]
 
-                vxarray[i][j] += d* (sarray[i-1][j] / s)
-                vxarray[i+1][j] -= d* (sarray[i+1][j] / s)
-                vyarray[i][j] += d* (sarray[i][j-1] / s)
-                vyarray[i][j+1] -= d* (sarray[i][j+1] / s)
+                darray[i][j] = 1.9*(vxarray[i+1][j] - vxarray[i][j] + vyarray[i][j+1] - vyarray[i][j])
+  
+                vxarray[i][j] += darray[i][j] * (sarray[i-1][j] / s_totalarray[i][j])
+                vxarray[i+1][j] -= darray[i][j] * (sarray[i+1][j] / s_totalarray[i][j])
+                vyarray[i][j] += darray[i][j] * (sarray[i][j-1] / s_totalarray[i][j])
+                vyarray[i][j+1] -= darray[i][j] * (sarray[i][j+1] / s_totalarray[i][j])
         
         #extrapolation
-        
         for i in range(301):
             vxarray[i][0] = vxarray[i][1]
             vxarray[i][100] = vxarray[i][99]
         for j in range(101):
             vyarray[0][j] = vyarray[1][j]
             vyarray[300][j] = vyarray[299][j]
-            
-        #advection        
+                
+        #advection
+        
+        count = 0
+        
         
         for i in range(1, 301):
             for j in range(1, 101):
                 
+                count += 1
+                '''
                 if sarray[i][j] != 0 and sarray[i-1][j] != 0:
                     x = i 
                     y = j + 0.5
                     vx = vxarray[i][j]
-                    vy = (vyarray[i][j] + vyarray[i][j+1] + vyarray[i-1][j] + vyarray[i-1][j+1])/4
-                    x -= changet*vx
-                    y -= changet*vy
-                    vx = samplefield(x, y, vxarray, 0, 0.5)
-                    new_vx[i][j] = vx
-                    
-                if sarray[i][j] != 0 and sarray[i][j-1] != 0:
-                    x = i + 0.5
-                    y = j
-                    vx = (vxarray[i][j-1] + vxarray[i][j] + vxarray[i-1][j+1] + vxarray[i][j+1])/4
-                    vy = vyarray[i][j]
-                    vy = samplefield(x, y, vyarray, 0.5, 0)
+                    vya = '''
+                vyavgs[i][j] = (vyarray[i][j] + vyarray[i][j+1] + vyarray[i-1][j] + vyarray[i-1][j+1])/4
+                #compute vvectors[i][j]
+                vvectors[i][j] = (vxarray[i][j], vyavgs[i][j])
+                #compute previous locaton
+                prelocations[i][j] = (i - (changet * vvectors[i][j][0]), j - (changet * vvectors[i][j][1]))
+                
+                (pri, prj) = (int(prelocations[i][j][0]), int(prelocations[i][j][1]))
+                x = get_frac(prelocations[i][j][0])
+                y = get_frac(prelocations[i][j][1])
 
+                w1 = 1-x
+                w2 = x
+                w3 = 1-y
+                w4 = y 
+                
+                if not (pri > 300 or prj > 100 or pri < 0 or prj < 0): 
+                    
+                    #new_vy[i][j] = w1*w3*vyarray[pri][prj] + w2*w3*vyarray[pri+1][prj] + w2*w4*vyarray[pri][prj+1] + w1*w4*vyarray[pri+1][prj+1]
+                    #new_vx[i][j] = w1*w3*vxarray[pri][prj] + w2*w3*vxarray[pri+1][prj] + w2*w4*vxarray[pri][prj+1] + w1*w4*vxarray[pri+1][prj+1]
+                 
+                    if pri == 299:
+                        new_vy[i][j] = w1*w3*vyarray[pri][prj] + 0 + w2*w4*vyarray[pri][prj+1] + 0
+                    else:
+                        new_vy[i][j] = w1*w3*vyarray[pri][prj] + w2*w3*vyarray[pri+1][prj] + w2*w4*vyarray[pri][prj+1] + w1*w4*vyarray[pri+1][prj+1]
+                    if pri == 300:
+                        new_vx[i][j] = w1*w3*vxarray[pri][prj] + 0 + w2*w4*vxarray[pri][prj+1] + 0
+                    else:
+                        new_vx[i][j] = w1*w3*vxarray[pri][prj] + w2*w3*vxarray[pri+1][prj] + w2*w4*vxarray[pri][prj+1] + w1*w4*vxarray[pri+1][prj+1]
+                    
+                
         vyarray = new_vy
         vxarray = new_vx
-        
-        for i in range(1, 301):
-            for j in range(1, 101):
-                
-                if sarray[i][j] != 0:
-                    vx = (vxarray[i][j] + vxarray[i+1][j]) * 0.5
-                    vy = (vyarray[i][j] + vyarray[i][j+1]) * 0.5
-                    x = i + 0.5 - changet*vx
-                    y = j + 0.5 - changet*vy
-                    
-                    new_m[i][j] = samplefield(x, y, marray, 0.5, 0.5) 
-        marray = new_m
 
         #update color values
         
