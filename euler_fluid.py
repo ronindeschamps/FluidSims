@@ -13,6 +13,7 @@ def main():
             return 0
         
     def samplefield(x, y, array, dx, dy):
+        
         n = 302
         h1 = 1
         h2 = 0.5
@@ -29,10 +30,7 @@ def main():
         
         val = sx*sy * array[x0][y0] + tx*sy * array[x1][y0] + tx*ty * array[x1][y1] + sx*ty * array[x0][y1]
         
-        return val
-        
-        
-        
+        return val      
         
     #graph creation -----------------
     
@@ -68,7 +66,8 @@ def main():
         sarray[i][0] = 0.0
         sarray[i][101] = 0.0
         
-    s_totalarray = [[0.0 for _ in range(102)] for _ in range(302)]
+    for j in range(40, 60):
+        sarray[250][j] = 0.0
 
         
     vyavgs = [[0.0 for _ in range(101)] for _ in range(301)]
@@ -77,18 +76,21 @@ def main():
     vvectors = [[(0.0, 0.0) for _ in range(101)] for _ in range(301)]
     prelocations = [[(0.0, 0.0) for _ in range(101)] for _ in range(301)]
     
-    g = 0 #flow velocity
+    g = 0.0
         
     while True:
 
-        vxarray[200][21] = -300
-        vxarray[200][22] = -300
-        vxarray[200][23] = -300
-        vxarray[200][24] = -300
-        vxarray[200][25] = -300
-        vxarray[200][26] = -300
-        vxarray[200][27] = -300
-        vxarray[200][28] = -300       
+        vxarray[299][45] = -300
+        vxarray[299][46] = -300
+        vxarray[299][47] = -300
+        vxarray[299][48] = -300
+        vxarray[299][49] = -300
+        vxarray[299][50] = -300
+        vxarray[299][51] = -300
+        vxarray[299][52] = -300
+        vxarray[299][53] = -300
+        vxarray[299][54] = -300
+       
         
 
         for i in range(1, 301):
@@ -102,14 +104,15 @@ def main():
         for i in range(1, 301):
             for j in range(1, 101):
                 
-                d = 1.8*(vxarray[i+1][j] - vxarray[i][j] + vyarray[i][j+1] - vyarray[i][j])
-                
-                s = sarray[i+1][j] + sarray[i-1][j] + sarray[i][j+1] + sarray[i][j-1]
+                if sarray != 0:
+                    d = 0.5*(vxarray[i+1][j] - vxarray[i][j] + vyarray[i][j+1] - vyarray[i][j])
+                    
+                    s = sarray[i+1][j] + sarray[i-1][j] + sarray[i][j+1] + sarray[i][j-1]
 
-                vxarray[i][j] += d* (sarray[i-1][j] / s)
-                vxarray[i+1][j] -= d* (sarray[i+1][j] / s)
-                vyarray[i][j] += d* (sarray[i][j-1] / s)
-                vyarray[i][j+1] -= d* (sarray[i][j+1] / s)
+                    vxarray[i][j] += d* (sarray[i-1][j] / s)
+                    vxarray[i+1][j] -= d* (sarray[i+1][j] / s)
+                    vyarray[i][j] += d* (sarray[i][j-1] / s)
+                    vyarray[i][j+1] -= d* (sarray[i][j+1] / s)
         
         #extrapolation
         

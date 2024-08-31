@@ -60,7 +60,7 @@ def main():
             for j in range(1, 101):
                 vyarray[i][j] += changet * vf
                     
-            #divergence = d = vx(i+1,j)-vx(i,j)+vy(i,j+1)-vy(i,j)
+        #divergence = d = vx(i+1,j)-vx(i,j)+vy(i,j+1)-vy(i,j)
         
         for i in range(1, 301):
             for j in range(1, 101):
